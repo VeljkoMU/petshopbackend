@@ -6,6 +6,8 @@ const ProductSchema = new mongoose.Schema({
     description: String,
     price: String,
     isAvailable: Boolean,
+    isOnDiscount: {type: Boolean, required: false, default: false},
+    discountPrice: {type: String, required: false, default: null},
     photos: [String],
     categories: [String],
     tags: [String]

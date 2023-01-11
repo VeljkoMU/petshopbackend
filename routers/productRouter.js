@@ -77,5 +77,15 @@ productRouter.get("/autoComplete", (req, res) => {
     })
 })
 
+productRouter.get("/discountProducts", (req, res) => {
+    databaseManager.getDiscountProducts()
+    .then((data)=>{
+        res.json(data).status(200).end()
+    })
+    .catch(err=>{
+        console.log(err)
+        res.status(500).end()
+    })
+})
 
 module.exports = productRouter

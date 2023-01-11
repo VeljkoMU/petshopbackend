@@ -126,6 +126,10 @@ class DatabaseManager {
 
         return result
     }
+
+    async getDiscountProducts(){
+        return ProductModel.find({isOnDiscount: true})
+    }
 }
 
 const databaseManager = new DatabaseManager()
