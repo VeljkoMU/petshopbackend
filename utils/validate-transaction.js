@@ -3,7 +3,7 @@ const databaseManager = require("../db/database-manager")
 
 const validateTransaction = function(req, res, next){
     console.log(1)
-    if(!validateTransactionData(req.body) || !validateProducts(res.body)){
+    if(!validateTransactionData(req.body) || !validateProducts(req.body)){
         res.status(400).end()
         return
     }

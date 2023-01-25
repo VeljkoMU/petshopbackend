@@ -1,23 +1,22 @@
 const express = require("express")
 const databaseManager = require("../db/database-manager")
-const validateToken = require("../middleware/validate-token")
-const validateTransaction = require("../middleware/validate-transaction")
+const validateTransaction = require("../utils/validate-transaction")
 const TransactionModel = require("../models/transaction")
 const generateCurrentDateTimeString = require("../utils/generate-current-datetime")
 
 const transactionRouter = express.Router()
 const emailService = require("../utils/email-service")
-const EthereumTransationManager = require("../utils/ethereum-transaction-manager")
+const dataEncryption = require("../utils/data-encryption")
 
 transactionRouter.post("/buy", validateTransaction, (req, res)=>{
     let currentDateTime = generateCurrentDateTimeString()
     
     let transaction = {
-        userName: dataEnryption.encrypt(req.body.userName),
-        userSurname: dataEnryption.encrypt(req.body.userSurname),
-        address: dataEnryption.encrypt(req.body.address),
-        contactEmail: dataEnryption.encrypt(req.body.contactEmail),
-        contactPhone: dataEnryption.encrypt(req.body.contactPhone),
+        userName: dataEncryption.encrypt(req.body.userName),
+        userSurname: dataEncryption.encrypt(req.body.userSurname),
+        address: dataEncryption.encrypt(req.body.address),
+        contactEmail: dataEncryption.encrypt(req.body.contactEmail),
+        contactPhone: dataEncryption.encrypt(req.body.contactPhone),
         typeOfDelivery: req.body.typeOfDelivery,
         products: req.body.products,
         overallPrice: req.body.overallPrice,
@@ -27,9 +26,9 @@ transactionRouter.post("/buy", validateTransaction, (req, res)=>{
 
     databaseManager.insertTransaction(transaction)
     .then(()=>{
-        emailService.send("", "TEST", "Test" + req.body.contactPhone)
-        if(res.body.contactEmail != ""){
-            emailService.send(res.body.contactEmail, "", "")
+        emailService.send("veki.uskovic@gmail.com", "NOVA PRUDZBINA - WEBSHOP", formatInfoMsg(transaction, req.body))
+        if(req.body.contactEmail != ""){
+            emailService.send(req.body.contactEmail, "OBAVESTENJE O PRIMLJENOJ NARUDZBINI", formatConformationMsg(transaction))
         }
         res.status(200).end()
     })
@@ -48,7 +47,7 @@ transactionRouter.post("/contact", (req, res) => {
         return
     }
 
-    emailService.send(email, "KORISNICKA PORUKA - WEBSHOP", msg)
+    emailService.send("veki.uskovic@gmail.com", "KORISNICKA PORUKA - WEBSHOP", msg + "\n POSLAO:" + email)
     .then(result => {
         res.status(200).end()
     })
@@ -57,5 +56,37 @@ transactionRouter.post("/contact", (req, res) => {
         res.status(500).end()
     })
 })
+
+function formatInfoMsg(transaction, body) {
+    let msg = "NOVA PORUDZBINA: \n" +
+    `IME: ${body.userName}\n` +
+    `PREZIME: ${body.userSurname}\n`+
+    `ADRESA: ${body.address}\n`+
+    `TEL: ${body.contactPhone}\n`+
+    `EMAIL: ${body.contactEmail}\n`+
+    `UKUPNO ZA NAPLATU: ${transaction.overallPrice}\n`+
+    "PROIZVODI: \n"
+
+    for(let product of transaction.products){
+        msg += `${product.productName} \n`
+    }
+
+    if(transaction.additionalData != ""){
+        msg += `DODATNA NAPOMENA KONRISNIKA: ${transaction.additionalData} \n`
+    }
+
+    return msg
+}
+
+function formatConformationMsg(transaction) {
+    let msg = "Naurdzbina koju ste poslali je uspesno primljena! \n" +
+    "Proizvodi koje ste naurcili: \n\n"
+
+    for(let product of transaction.products){
+        msg += `${product.productName} \n`
+    }
+
+    return msg
+}
 
 module.exports = transactionRouter

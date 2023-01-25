@@ -1,6 +1,5 @@
 const express = require("express")
 const databaseManager = require("../db/database-manager")
-const validateToken = require("../middleware/validate-token")
 const ProductModel = require("../models/product")
 
 const productRouter = express.Router()

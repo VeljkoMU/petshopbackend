@@ -1,7 +1,7 @@
 const ProductModel = require("../models/product")
 const TransactionModel = require("../models/transaction")
-const UserModel = require("../models/user")
 const dataEncryption = require("../utils/data-encryption")
+const mongoose = require("mongoose")
 
 class DatabaseManager {
     constructor(){
@@ -15,40 +15,14 @@ class DatabaseManager {
         })
     }
 
-    async getUserByEmail(email){
-        let user = await UserModel.findOne({email: email})
-
-        if(!user)
-            return undefined
-        
-        return user
-    }
-
-    async getUserById(userId){
-        return UserModel.findById(userId)
-    }
-
-    async insertUser(user){
-      return   UserModel.create({
-            name: user.name,
-            surname: user.surname,
-            address: user.address,
-            password: user.password,
-            phone: user.phone,
-            email: user.email
-        })
-    }
-
-    async deleteUser(userId){
-        return UserModel.findByIdAndDelete(userId)
-    }
-
     async insertProduct(product){
         return ProductModel.create({
             name: product.name,
             description: product.description,
             price: product.price,
             isAvailable: product.isAvailable,
+            isOnDiscount: product.isOnDiscount,
+            discountPrice: product.discountPrice,
             photos: product.photos,
             rating: 0,
             categories: product.categories,
@@ -116,9 +90,9 @@ class DatabaseManager {
         let products = await ProductModel.find({})
         let result = []
 
-        for(let product in products){
-            for(let tag in product.tags){
-                if(tag.includes(keyword)){
+        for(let product of products){
+            for(let tag of product.tags){
+                if(tag.includes(keyword) && !result.includes(tag)){
                     result.push(tag)
                 }
             }
